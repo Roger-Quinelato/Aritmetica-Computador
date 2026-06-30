@@ -64,7 +64,7 @@ Material complementar do grupo no Notion:
 | Arquivo | Descrição |
 |---------|-----------|
 | `atividade-pratica-cap10.html` | Laboratório interativo (atividade prática) |
-| `Questionario_Cap10_Aritmetica.docx` | Questionário avaliativo — 8 questões (A–D) + gabarito |
+| `Questionario_Cap10_Aritmetica.pdf` | Questionário avaliativo — 8 questões (A–D) + gabarito |
 | `Seminarios_Praticas_e_Cronograma.pdf` | Guia de seminários, práticas e cronograma da disciplina |
 | `PID Bases 6B SI.pdf` | Plano Interdisciplinar Docente (PID) |
 
