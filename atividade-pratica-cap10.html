@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratório Interativo — Aritmética do Computador (Cap. 10)</title>
+<style>
+  :root{
+    --bg:#0f1226; --bg2:#161a36; --card:#1b2042; --card2:#222a55;
+    --ink:#eef1ff; --mut:#9aa3d4; --line:#2b3268;
+    --acc:#6ea8ff; --acc2:#8b7dff; --ok:#3ddc97; --warn:#ffb454; --bad:#ff6b81;
+    --r:14px; --gap:16px;
+    --mono:'SF Mono',ui-monospace,Consolas,'Roboto Mono',monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(1200px 600px at 80% -10%,#23306b33,transparent),var(--bg);
+    color:var(--ink);line-height:1.55;padding:24px;min-height:100vh}
+  .wrap{max-width:1080px;margin:0 auto}
+  header.top{display:flex;flex-wrap:wrap;align-items:center;gap:14px;justify-content:space-between;
+    background:linear-gradient(120deg,#1c2350,#2a2170);border:1px solid var(--line);
+    border-radius:var(--r);padding:20px 24px;margin-bottom:var(--gap)}
+  header.top h1{font-size:22px;font-weight:700;letter-spacing:.2px}
+  header.top p{color:var(--mut);font-size:13px;margin-top:2px}
+  .badge{font-size:12px;color:var(--acc);background:#6ea8ff1a;border:1px solid #6ea8ff44;
+    padding:6px 12px;border-radius:999px;white-space:nowrap}
+  nav.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:var(--gap)}
+  nav.tabs button{background:var(--card);color:var(--mut);border:1px solid var(--line);
+    padding:10px 16px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
+  nav.tabs button:hover{color:var(--ink);border-color:var(--acc)}
+  nav.tabs button.active{background:linear-gradient(120deg,var(--acc),var(--acc2));color:#0c1029;border-color:transparent}
+  .panel{display:none;animation:fade .25s ease}
+  .panel.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin-bottom:var(--gap)}
+  .card h2{font-size:17px;margin-bottom:4px}
+  .card h3{font-size:14px;color:var(--acc);margin:18px 0 8px;text-transform:uppercase;letter-spacing:.6px}
+  .sub{color:var(--mut);font-size:13px;margin-bottom:14px}
+  label.fld{display:block;font-size:12px;color:var(--mut);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+  input[type=number],input[type=text],select{background:var(--bg2);border:1px solid var(--line);color:var(--ink);
+    padding:10px 12px;border-radius:8px;font-size:15px;font-family:var(--mono);width:100%}
+  input[type=range]{width:100%;accent-color:var(--acc)}
+  .row{display:flex;gap:16px;flex-wrap:wrap}
+  .col{flex:1;min-width:160px}
+  button.act{background:linear-gradient(120deg,var(--acc),var(--acc2));color:#0c1029;border:none;
+    padding:10px 18px;border-radius:9px;font-weight:700;cursor:pointer;font-size:13px}
+  button.ghost{background:var(--card2);color:var(--ink);border:1px solid var(--line);
+    padding:10px 18px;border-radius:9px;font-weight:600;cursor:pointer;font-size:13px}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+  /* bit boxes */
+  .bits{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .bit{display:flex;flex-direction:column;align-items:center;gap:3px}
+  .bit .b{width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:20px;font-weight:700;border-radius:8px;
+    background:var(--bg2);border:1px solid var(--line);cursor:pointer;user-select:none;transition:.12s}
+  .bit .b.on{background:#6ea8ff22;border-color:var(--acc);color:var(--acc)}
+  .bit .b.sign{border-color:var(--bad)}
+  .bit .b.sign.on{background:#ff6b8122;color:var(--bad)}
+  .bit .w{font-size:11px;color:var(--mut);font-family:var(--mono)}
+  .bit .w.neg{color:var(--bad)}
+  .big{font-family:var(--mono);font-size:30px;font-weight:800;letter-spacing:1px}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-top:14px}
+  .kpi{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+  .kpi .l{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  .kpi .v{font-family:var(--mono);font-size:22px;font-weight:700;margin-top:4px;word-break:break-all}
+  table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:13px;margin-top:10px}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:center}
+  th{color:var(--mut);font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+  tr.cur{background:#6ea8ff1a}
+  tr.op td:last-child{color:var(--acc2)}
+  .note{font-size:12.5px;color:var(--mut);background:var(--bg2);border-left:3px solid var(--acc);
+    padding:10px 14px;border-radius:0 8px 8px 0;margin-top:14px}
+  .note.warn{border-color:var(--warn)}.note.bad{border-color:var(--bad)}
+  .mono{font-family:var(--mono)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:13px;padding:3px 9px;border-radius:6px;margin:2px}
+  .pill.s{background:#ff6b8122;color:var(--bad)}
+  .pill.e{background:#ffb45422;color:var(--warn)}
+  .pill.m{background:#3ddc9722;color:var(--ok)}
+  .res{font-family:var(--mono);font-size:15px;background:var(--bg2);border:1px solid var(--line);
+    border-radius:8px;padding:12px 14px;margin-top:8px;word-break:break-all}
+  footer{color:var(--mut);font-size:12px;text-align:center;padding:18px 0 4px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-top:10px}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>🧮 Laboratório de Aritmética do Computador</h1>
+      <p>Cap. 10 — Stallings · Grupo 6 · Atividade prática interativa</p>
+    </div>
+    <span class="badge">Bases da Computação · 16/07/2026</span>
+  </header>
+
+  <nav class="tabs">
+    <button class="active" data-tab="t1">① Complemento de Dois</button>
+    <button data-tab="t2">② Algoritmo de Booth</button>
+    <button data-tab="t3">③ IEEE 754</button>
+    <button data-tab="t4">④ Armadilhas do Float</button>
+  </nav>
+
+  <!-- ====== LAB 1 ====== -->
+  <section class="panel active" id="t1">
+    <div class="card">
+      <h2>Conversor de Complemento de Dois</h2>
+      <p class="sub">Ajuste o valor e veja o padrão de bits. A "caixa de valores" mostra o peso de cada posição — o bit mais à esquerda tem peso <b>negativo</b> (−2ⁿ⁻¹). Clique em qualquer bit para alterná-lo.</p>
+      <div class="row">
+        <div class="col">
+          <label class="fld">Largura (bits)</label>
+          <select id="width" onchange="L1.setWidth()">
+            <option value="4">4 bits</option>
+            <option value="8" selected>8 bits</option>
+            <option value="16">16 bits</option>
+          </select>
+        </div>
+        <div class="col" style="flex:2">
+          <label class="fld">Valor decimal: <span id="valLbl" class="mono"></span></label>
+          <input type="range" id="slider" oninput="L1.fromSlider()">
+        </div>
+      </div>
+      <div class="bits" id="boxes"></div>
+      <div class="legend">
+        <span><i class="dot" style="background:#ff6b81"></i> bit de sinal (peso negativo)</span>
+        <span><i class="dot" style="background:#6ea8ff"></i> bit ligado (1)</span>
+      </div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Complemento de dois</div><div class="v" id="k-c2">0</div></div>
+        <div class="kpi"><div class="l">Sinal-magnitude lê como</div><div class="v" id="k-sm">0</div></div>
+        <div class="kpi"><div class="l">Sem sinal lê como</div><div class="v" id="k-u">0</div></div>
+        <div class="kpi"><div class="l">Negação (−x)</div><div class="v" id="k-neg">0</div></div>
+      </div>
+      <div class="note" id="n1"></div>
+    </div>
+  </section>
+
+  <!-- ====== LAB 2 ====== -->
+  <section class="panel" id="t2">
+    <div class="card">
+      <h2>Simulador do Algoritmo de Booth</h2>
+      <p class="sub">Multiplicação em complemento de dois. O algoritmo examina o par <span class="mono">Q₀Q₋₁</span>: <b>1-0 → subtrai M</b>, <b>0-1 → soma M</b>, <b>iguais → só desloca</b>. Depois faz deslocamento aritmético à direita (preserva o sinal).</p>
+      <div class="row">
+        <div class="col"><label class="fld">Multiplicando (M)</label><input type="number" id="bm" value="7"></div>
+        <div class="col"><label class="fld">Multiplicador (Q)</label><input type="number" id="bq" value="3"></div>
+        <div class="col"><label class="fld">Bits</label>
+          <select id="bbits"><option>4</option><option selected>5</option><option>6</option><option>8</option></select></div>
+      </div>
+      <div class="btns">
+        <button class="act" onclick="L2.build()">Carregar</button>
+        <button class="ghost" id="bstep" onclick="L2.step()" disabled>▶ Passo</button>
+        <button class="ghost" id="ball" onclick="L2.all()" disabled>⏭ Tudo</button>
+        <button class="ghost" id="brst" onclick="L2.reset()" disabled>↺ Reiniciar</button>
+      </div>
+      <div id="btableWrap"></div>
+      <div class="note" id="n2"></div>
+    </div>
+  </section>
+
+  <!-- ====== LAB 3 ====== -->
+  <section class="panel" id="t3">
+    <div class="card">
+      <h2>Decompositor IEEE 754 — Precisão Simples (32 bits)</h2>
+      <p class="sub">Digite um número e veja como ele é armazenado: <span class="pill s">1 sinal</span><span class="pill e">8 expoente (bias 127)</span><span class="pill m">23 significando</span>. O bit "1" antes da vírgula é implícito (grátis).</p>
+      <div class="row">
+        <div class="col" style="flex:2">
+          <label class="fld">Valor</label>
+          <input type="text" id="f32in" value="0.15625" onkeyup="if(event.key==='Enter')L3.go()">
+        </div>
+        <div class="col" style="align-self:flex-end"><button class="act" style="width:100%" onclick="L3.go()">Decompor</button></div>
+      </div>
+      <div class="btns">
+        <button class="ghost" onclick="L3.set(0.1)">0.1</button>
+        <button class="ghost" onclick="L3.set(0.2)">0.2</button>
+        <button class="ghost" onclick="L3.set(-118.625)">-118.625</button>
+        <button class="ghost" onclick="L3.set(384)">384</button>
+        <button class="ghost" onclick="L3.set(0.333333)">1/3</button>
+      </div>
+      <div class="bits" id="f32bits" style="margin-top:18px"></div>
+      <div class="kpis">
+        <div class="kpi"><div class="l">Sinal</div><div class="v" id="f-sign">+</div></div>
+        <div class="kpi"><div class="l">Expoente armazenado / real</div><div class="v" id="f-exp">—</div></div>
+        <div class="kpi"><div class="l">Valor reconstruído</div><div class="v" id="f-val">—</div></div>
+        <div class="kpi"><div class="l">Erro de representação</div><div class="v" id="f-err">—</div></div>
+      </div>
+      <h3>Valor exato armazenado</h3>
+      <div class="res" id="f-exact">—</div>
+      <div class="note" id="n3"></div>
+    </div>
+  </section>
+
+  <!-- ====== LAB 4 ====== -->
+  <section class="panel" id="t4">
+    <div class="card">
+      <h2>0.1 + 0.2 — por que não dá 0.3?</h2>
+      <p class="sub">Frações decimais simples viram dízimas infinitas em binário. O resultado é arredondado e o erro aparece.</p>
+      <div class="row">
+        <div class="col"><label class="fld">a</label><input type="number" id="fa" value="0.1" step="0.1"></div>
+        <div class="col"><label class="fld">b</label><input type="number" id="fb" value="0.2" step="0.1"></div>
+        <div class="col" style="align-self:flex-end"><button class="act" style="width:100%" onclick="L4.add()">Somar</button></div>
+      </div>
+      <div class="res" id="fres">—</div>
+      <div class="note bad" id="n4a"></div>
+    </div>
+    <div class="card">
+      <h2>Overflow de inteiros (int 32 bits)</h2>
+      <p class="sub">Um <span class="mono">int</span> vai de −2.147.483.648 a +2.147.483.647. Somar 1 ao máximo "dá a volta" e vira o mínimo. É o coração do Bug do Ano 2038.</p>
+      <div class="row">
+        <div class="col" style="flex:2"><label class="fld">Valor inicial</label><input type="number" id="ov" value="2147483647"></div>
+        <div class="col"><label class="fld">Somar</label><input type="number" id="ovadd" value="1"></div>
+        <div class="col" style="align-self:flex-end"><button class="act" style="width:100%" onclick="L4.ovf()">Calcular (int32)</button></div>
+      </div>
+      <div class="res" id="ovres">—</div>
+      <div class="note warn" id="n4b"></div>
+    </div>
+  </section>
+
+  <footer>Material de apoio · Aritmética do Computador (Stallings, cap. 10) · 100% offline — abra em qualquer navegador</footer>
+</div>
+
+<script>
+/* ============ NAV ============ */
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById(b.dataset.tab).classList.add('active');
+  };
+});
+
+/* ============ LAB 1: COMPLEMENTO DE DOIS ============ */
+const L1={
+  n:8,bits:[],
+  setWidth(){this.n=+document.getElementById('width').value;this.bits=Array(this.n).fill(0);
+    const min=-(2**(this.n-1)),max=2**(this.n-1)-1;
+    const s=document.getElementById('slider');s.min=min;s.max=max;s.value=0;this.render();},
+  fromSlider(){let v=+document.getElementById('slider').value;this.bits=this.toBits(v);this.render();},
+  toBits(v){const n=this.n;let u=v<0?v+2**n:v;const out=[];for(let i=n-1;i>=0;i--)out.push((u>>i)&1);return out;},
+  toggle(i){this.bits[i]^=1;this.sync();},
+  sync(){const v=this.value();document.getElementById('slider').value=v;this.render();},
+  value(){const n=this.n;let val=0;for(let i=0;i<n;i++){const w=(i===0)?-(2**(n-1)):2**(n-1-i);val+=this.bits[i]*w;}return val;},
+  unsignedVal(){let u=0;for(let i=0;i<this.n;i++)u+=this.bits[i]*2**(this.n-1-i);return u;},
+  smVal(){const mag=this.unsignedVal()&(2**(this.n-1)-1);return this.bits[0]?-mag:mag;},
+  render(){
+    const n=this.n,box=document.getElementById('boxes');box.innerHTML='';
+    for(let i=0;i<n;i++){
+      const w=(i===0)?-(2**(n-1)):2**(n-1-i);
+      const d=document.createElement('div');d.className='bit';
+      d.innerHTML=`<div class="b ${i===0?'sign':''} ${this.bits[i]?'on':''}" onclick="L1.toggle(${i})">${this.bits[i]}</div>
+        <div class="w ${w<0?'neg':''}">${w}</div>`;
+      box.appendChild(d);
+    }
+    const v=this.value();
+    document.getElementById('valLbl').textContent=v;
+    document.getElementById('k-c2').textContent=v;
+    document.getElementById('k-sm').textContent=this.smVal();
+    document.getElementById('k-u').textContent=this.unsignedVal();
+    document.getElementById('k-neg').textContent=(v===-(2**(n-1)))?`${-v} (overflow!)`:-v;
+    const min=-(2**(n-1)),max=2**(n-1)-1;
+    let msg=`Intervalo em ${n} bits: <b>${min}</b> a <b>${max}</b>. `;
+    if(v===min)msg+=`Este é o valor mais negativo: sua negação não cabe (anomalia clássica do complemento de dois).`;
+    else if(this.bits[0])msg+=`Bit de sinal = 1 → número negativo. Note que sinal-magnitude leria <b>${this.smVal()}</b>, valor diferente!`;
+    else msg+=`Bit de sinal = 0 → número positivo (lido igual em todas as representações).`;
+    document.getElementById('n1').innerHTML=msg;
+  }
+};
+
+/* ============ LAB 2: BOOTH ============ */
+const L2={
+  n:5,M:0,A:0,Q:0,Qm1:0,count:0,steps:[],done:false,
+  bin(v){return v.toString(2).padStart(this.n,'0').slice(-this.n);},
+  signed(u,bits){return u>=2**(bits-1)?u-2**bits:u;},
+  build(){
+    this.n=+document.getElementById('bbits').value;
+    const m=parseInt(document.getElementById('bm').value,10);
+    const q=parseInt(document.getElementById('bq').value,10);
+    const lim=2**(this.n-1);
+    if(isNaN(m)||isNaN(q)||m<-lim||m>lim-1||q<-lim||q>lim-1){
+      document.getElementById('n2').innerHTML=`⚠️ Com ${this.n} bits, cada número deve estar entre ${-lim} e ${lim-1}.`;return;}
+    const mask=2**this.n-1;
+    this.M=(m<0?m+2**this.n:m)&mask;
+    this.A=0;this.Q=(q<0?q+2**this.n:q)&mask;this.Qm1=0;this.count=0;this.done=false;
+    this.steps=[{A:this.A,Q:this.Q,Qm1:this.Qm1,op:'Valores iniciais',cur:true}];
+    document.getElementById('bstep').disabled=false;
+    document.getElementById('ball').disabled=false;
+    document.getElementById('brst').disabled=false;
+    this.expect=m*q;
+    this.draw();
+    document.getElementById('n2').innerHTML=`Carregado: M=${m} (${this.bin(this.M)}), Q=${q} (${this.bin(this.Q)}). Clique em <b>Passo</b> para executar ${this.n} ciclos.`;
+  },
+  step(){
+    if(this.done)return;
+    const mask=2**this.n-1;let op='';
+    const pair=''+(this.Q&1)+this.Qm1;
+    if(pair==='10'){this.A=(this.A-this.M+2**this.n*2)&mask;op='10 → A = A − M, depois desloca';}
+    else if(pair==='01'){this.A=(this.A+this.M)&mask;op='01 → A = A + M, depois desloca';}
+    else{op=pair+' → só desloca';}
+    // arithmetic right shift on [A,Q,Qm1]
+    const sign=(this.A>>(this.n-1))&1;
+    this.Qm1=this.Q&1;
+    this.Q=((this.Q>>1)|((this.A&1)<<(this.n-1)))&mask;
+    this.A=((this.A>>1)|(sign<<(this.n-1)))&mask;
+    this.count++;
+    this.steps.push({A:this.A,Q:this.Q,Qm1:this.Qm1,op,cur:true});
+    if(this.count>=this.n)this.finish();
+    this.draw();
+  },
+  all(){while(!this.done)this.step();},
+  finish(){
+    this.done=true;
+    document.getElementById('bstep').disabled=true;
+    document.getElementById('ball').disabled=true;
+    const combined=this.A*2**this.n+this.Q;
+    const result=this.signed(combined,2*this.n);
+    const ok=result===this.expect;
+    document.getElementById('n2').innerHTML=
+      `✅ Resultado em <b>A:Q</b> = <span class="mono">${this.bin(this.A)} ${this.bin(this.Q)}</span> = <b>${result}</b>. `+
+      (ok?`Confere com o produto esperado (${this.expect}).`:`⚠️ esperado ${this.expect}.`);
+  },
+  reset(){this.build();},
+  draw(){
+    let h='<table><thead><tr><th>A</th><th>Q</th><th>Q₋₁</th><th>Operação</th></tr></thead><tbody>';
+    this.steps.forEach((s,i)=>{
+      const cur=i===this.steps.length-1&&!this.done;
+      const isOp=s.op.includes('A =');
+      h+=`<tr class="${cur?'cur':''} ${isOp?'op':''}"><td>${this.bin(s.A)}</td><td>${this.bin(s.Q)}</td><td>${s.Qm1}</td><td style="text-align:left">${s.op}</td></tr>`;
+    });
+    h+='</tbody></table>';
+    document.getElementById('btableWrap').innerHTML=h;
+  }
+};
+
+/* ============ LAB 3: IEEE 754 ============ */
+const L3={
+  set(v){document.getElementById('f32in').value=v;this.go();},
+  go(){
+    const raw=document.getElementById('f32in').value.replace(',','.');
+    const f=parseFloat(raw);
+    if(isNaN(f)){document.getElementById('n3').innerHTML='⚠️ Digite um número válido.';return;}
+    const buf=new ArrayBuffer(4);
+    new Float32Array(buf)[0]=f;
+    const u=new Uint32Array(buf)[0];
+    const f32=new Float32Array(buf)[0];
+    const bitsStr=u.toString(2).padStart(32,'0');
+    const sign=bitsStr[0], exp=bitsStr.slice(1,9), man=bitsStr.slice(9);
+    // bit boxes
+    const box=document.getElementById('f32bits');box.innerHTML='';
+    [...bitsStr].forEach((b,i)=>{
+      let cls=i===0?'s':(i<9?'e':'m');
+      const d=document.createElement('div');d.className='bit';
+      const color=cls==='s'?'#ff6b81':cls==='e'?'#ffb454':'#3ddc97';
+      d.innerHTML=`<div class="b" style="width:22px;height:34px;font-size:14px;${b==='1'?`background:${color}22;border-color:${color};color:${color}`:''}">${b}</div>`;
+      box.appendChild(d);
+      if(i===0||i===8){const sp=document.createElement('div');sp.style.width='10px';box.appendChild(sp);}
+    });
+    const expStored=parseInt(exp,2);
+    const expReal=expStored-127;
+    document.getElementById('f-sign').textContent=sign==='1'?'− (negativo)':'+ (positivo)';
+    document.getElementById('f-exp').textContent=`${expStored} / ${expReal>=0?'+':''}${expReal}`;
+    document.getElementById('f-val').textContent=f32;
+    const err=Math.abs(f-f32);
+    document.getElementById('f-err').textContent=err===0?'0 (exato)':err.toExponential(3);
+    document.getElementById('f-exact').textContent=f32.toPrecision(20).replace(/0+$/,'')+(f32===f?'  (representação exata)':'  (aproximação)');
+    let msg='';
+    if(err===0)msg=`Este número é representável <b>exatamente</b> em binário de 32 bits — significando finito.`;
+    else msg=`O valor digitado <b>não</b> tem representação exata em base 2; foi arredondado para o número de 32 bits mais próximo. Esse erro de ${err.toExponential(2)} é a raiz dos problemas de precisão.`;
+    document.getElementById('n3').innerHTML=msg;
+  }
+};
+
+/* ============ LAB 4: ARMADILHAS ============ */
+const L4={
+  add(){
+    const a=parseFloat(document.getElementById('fa').value);
+    const b=parseFloat(document.getElementById('fb').value);
+    const s=a+b;
+    document.getElementById('fres').innerHTML=
+      `${a} + ${b} = <b>${s}</b><br><span style="color:var(--mut)">20 dígitos: ${s.toPrecision(20)}</span>`;
+    const expected=Math.round((a+b)*1e10)/1e10;
+    document.getElementById('n4a').innerHTML= (s!==expected)
+      ? `Veja a cauda <b>...${s.toPrecision(20).slice(-8)}</b>. O computador não errou a conta — ele guardou ${a} e ${b} de forma aproximada e somou exatamente esses valores aproximados. Por isso bancos usam inteiros/centavos ou BigDecimal.`
+      : `Neste caso a soma deu exata, mas troque para 0.1 + 0.2 e veja o erro aparecer.`;
+  },
+  ovf(){
+    const v=parseInt(document.getElementById('ov').value,10);
+    const add=parseInt(document.getElementById('ovadd').value,10);
+    // simulate int32 wrap
+    const res=(v+add)|0;
+    document.getElementById('ovres').innerHTML=
+      `(${v} + ${add}) como int32 = <b>${res}</b>`;
+    const real=v+add;
+    document.getElementById('n4b').innerHTML= (res!==real)
+      ? `Matematicamente seria ${real}, mas não cabe em 32 bits → "deu a volta" (wrap-around) para <b>${res}</b>. Em 2038 o relógio UNIX (segundos desde 1970 num int32) estoura e volta para 1901.`
+      : `Sem overflow: ${real} ainda cabe em 32 bits. Aumente o valor inicial para forçar o estouro.`;
+  }
+};
+
+/* init */
+L1.setWidth();
+L2.build();
+L3.go();
+L4.add();L4.ovf();
+</script>
+</body>
+</html>
