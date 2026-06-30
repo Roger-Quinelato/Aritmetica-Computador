@@ -59,9 +59,11 @@ A apresentação foi montada no **Canva** (15 slides, estilo geométrico com ima
 | Arquivo | Descrição |
 |---------|-----------|
 | `atividade-pratica-cap10.html` | Laboratório interativo (atividade prática) |
+| `Questionario_Cap10_Aritmetica.docx` | Questionário avaliativo — 8 questões (A–D) + gabarito |
 | `Seminarios_Praticas_e_Cronograma.pdf` | Guia de seminários, práticas e cronograma da disciplina |
 | `PID Bases 6B SI.pdf` | Plano Interdisciplinar Docente (PID) |
-| `Stallings - Arquitetura e Organização de Computadores - 10a.pdf` | Livro-texto de referência (Cap. 10) |
+
+> ℹ️ O livro-texto (Stallings, 10ª ed.) **não é versionado** neste repositório por questões de direitos autorais — veja a referência abaixo.
 
 ---
 
