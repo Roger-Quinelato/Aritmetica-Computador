@@ -52,6 +52,11 @@ xdg-open atividade-pratica-cap10.html
 A apresentação foi montada no **Canva** (15 slides, estilo geométrico com imagens):
 - 👉 [Abrir apresentação](https://www.canva.com/d/0OFHIZhPfBkUHN4)
 
+## 📝 Notion
+
+Material complementar do grupo no Notion:
+- 👉 [Aritmética do Computador](https://app.notion.com/p/Aritm-tica-do-Computador-38e62d7b06be80c29762c6734d8d37e4?pvs=3)
+
 ---
 
 ## 📂 Conteúdo do repositório
